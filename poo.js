@@ -1,11 +1,14 @@
 console.log('hello poop');
 
 var five = require("johnny-five");
-var board = new five.Board();
+var raspi = require("raspi-io");
+var board = new five.Board({
+	io: new raspi()
+});
 
 board.on("ready", function() {
-  // Create an Led on pin 13
-  var led = new five.Led(13);
-  // Blink every half second
-  led.blink(500);
+  var yellowled = new five.Led("P1-11");
+  yellowled.blink(500);
+  var redled = new five.Led("P1-15");
+  redled.blink(1000);
 });
