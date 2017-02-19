@@ -1,0 +1,14 @@
+{
+  "name": "node-crap",
+  "version": "1.0.0",
+  "description": "",
+  "main": "poo.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tracy Lee <tracy@navisocial.com>",
+  "license": "ISC",
+  "dependencies": {
+    "johnny-five": "^0.10.6"
+  }
+}
