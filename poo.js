@@ -1,29 +1,45 @@
-var Rx = require("rxjs");
+const Rx = require("rxjs");
+const five = require("johnny-five");
+const raspi = require("raspi-io");
 
-console.log('hello poop');
-
-var five = require("johnny-five");
-var raspi = require("raspi-io");
-var board = new five.Board({
+const board = new five.Board({
 	io: new raspi()
 });
 
 board.on("ready", function() {
-  var button = new five.Button("P1-13");
-  board.repl.inject({
-    button: button
+  button = new five.Button("GPIO17");
+
+  const red = new five.Led("GPIO27");  
+  const green = new five.Led("GPIO24");
+  const blue = new five.Led("GPIO16"); 
+
+  const buttonDown$ = Rx.Observable.fromEvent(button, 'down');
+  const buttonUp$ = Rx.Observable.fromEvent(button, 'up');  
+
+  buttonDown$.subscribe(() => { 
+	green.off();    
+	red.on();
   });
 
-  button.on("down", () => {
-    console.log("down");
+  buttonUp$.subscribe(() => {
+	red.off();
+	green.on();
   });
 
-  button.on("up", () => {
-    console.log("up");
+  const strobePhase = 150;
+  const twoSeconds = 2 * 1000;
+
+  const debouncedDown$ = buttonDown$.debounceTime(twoSeconds);
+  const downCount$ = buttonDown$.buffer(debouncedDown$);
+  const delayedDownCount$ = downCount$.delayWhen(downs => {
+	Rx.Observable.interval(5 * 2 * strobePhase);
   });
 
-  var yellowled = new five.Led("P1-11");
-  yellowled.blink(500);
-  var redled = new five.Led("P1-15");
-  redled.blink(1000);
+  downCount$.subscribe(() => {
+	blue.strobe(strobePhase);
+  });
+ 
+  delayedDownCount$.subscribe(() => {
+	blue.stop().off();
+  });
 });
